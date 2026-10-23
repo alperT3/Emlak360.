@@ -40,7 +40,10 @@ document.addEventListener("DOMContentLoaded", () => {
 const detailModal = document.getElementById('detailModal');
 
 function openDetailModal(id) {
-    // realEstateDB kontrolü (Eğer ana veritabanı başka bir dosyadaysa veya buradaysa güvenle çalışır)
+    // --- İLAN DETAY MODALI VE 360° SANAL TUR ---
+const detailModal = document.getElementById('detailModal');
+
+function openDetailModal(id) {
     const listing = typeof realEstateDB !== 'undefined' ? realEstateDB.find(item => item.id === id) : null;
     
     if(listing) {
@@ -49,7 +52,14 @@ function openDetailModal(id) {
         const tour360Img = listing.tour360Image || "https://pannellum.org/images/alma.jpg";
 
         const detailImageEl = document.getElementById('detailImage');
-        if(detailImageEl) detailImageEl.src = images[0];
+        if(detailImageEl) {
+            detailImageEl.style.display = 'block';
+            detailImageEl.src = images[0];
+        }
+
+        // Eğer daha önce açık kalmış bir 360 viewer varsa gizleyelim
+        const existingPano = document.getElementById('panoramaViewer');
+        if(existingPano) existingPano.style.display = 'none';
         
         const thumbContainer = document.getElementById('detailThumbnails');
         if(thumbContainer) {
@@ -59,43 +69,68 @@ function openDetailModal(id) {
             thumbContainer.style.flexWrap = "wrap";
             thumbContainer.style.alignItems = "center";
 
-            // 1. Standart Fotoğraflar Küçük Resimleri
+            // 1. Standart Fotoğraflar
             images.forEach((imgUrl, index) => {
                 const thumb = document.createElement('img');
                 thumb.src = imgUrl;
-                thumb.style.width = "70px"; 
-                thumb.style.height = "50px"; 
-                thumb.style.objectFit = "cover";
-                thumb.style.borderRadius = "6px"; 
-                thumb.style.cursor = "pointer"; 
-                thumb.style.border = index === 0 ? "2px solid #ff4757" : "2px solid transparent";
+                thumb.style.width = "70px"; thumb.style.height = "50px"; thumb.style.objectFit = "cover";
+                thumb.style.borderRadius = "6px"; thumb.style.cursor = "pointer"; thumb.style.border = index === 0 ? "2px solid #ff4757" : "2px solid transparent";
                 
                 thumb.onclick = () => {
-                    detailImageEl.src = imgUrl;
-                    Array.from(thumbContainer.children).forEach(t => {
-                        if(t.tagName === 'IMG') t.style.border = "2px solid transparent";
-                    });
+                    const panoDiv = document.getElementById('panoramaViewer');
+                    if(panoDiv) panoDiv.style.display = 'none';
+                    if(detailImageEl) {
+                        detailImageEl.style.display = 'block';
+                        detailImageEl.src = imgUrl;
+                    }
+                    Array.from(thumbContainer.children).forEach(t => { if(t.tagName === 'IMG') t.style.border = "2px solid transparent"; });
                     thumb.style.border = "2px solid #ff4757";
                 };
                 thumbContainer.appendChild(thumb);
             });
 
-            // 2. Panoramik Görsel Sekme Butonu
+            // 2. Panoramik Görsel Butonu
             const panoBtn = document.createElement('button');
             panoBtn.innerText = "🌄 Panoramik Görsel";
             panoBtn.style.cssText = "background: #ffa502; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;";
             panoBtn.onclick = () => { 
-                detailImageEl.src = panoramicImg; 
+                const panoDiv = document.getElementById('panoramaViewer');
+                if(panoDiv) panoDiv.style.display = 'none';
+                if(detailImageEl) {
+                    detailImageEl.style.display = 'block';
+                    detailImageEl.src = panoramicImg; 
+                }
             };
             thumbContainer.appendChild(panoBtn);
 
-            // 3. 360° Sanal Tur Sekme Butonu
+            // 3. 360° Sanal Tur Butonu (Gerçek 360° Küresel Gezinti)
             const tourBtn = document.createElement('button');
             tourBtn.innerText = "🔄 360° Sanal Tur";
             tourBtn.style.cssText = "background: #ff4757; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;";
             tourBtn.onclick = () => {
-                alert("360° Sanal Tur Modu Aktif! (Test Görseli Görüntüleniyor)");
-                detailImageEl.src = tour360Img; 
+                if(detailImageEl) detailImageEl.style.display = 'none';
+                
+                const imageContainer = detailImageEl.parentNode;
+                let panoDiv = document.getElementById('panoramaViewer');
+                if(!panoDiv) {
+                    panoDiv = document.createElement('div');
+                    panoDiv.id = 'panoramaViewer';
+                    panoDiv.style.width = "100%";
+                    panoDiv.style.height = "350px";
+                    panoDiv.style.borderRadius = "8px";
+                    imageContainer.appendChild(panoDiv);
+                } else {
+                    panoDiv.style.display = 'block';
+                }
+
+                // Pannellum 360° Oynatıcısını Başlat
+                pannellum.viewer('panoramaViewer', {
+                    type: "equirectangular",
+                    image: tour360Img,
+                    autoLoad: true,
+                    compass: true,
+                    hfov: 110
+                });
             };
             thumbContainer.appendChild(tourBtn);
         }
@@ -129,3 +164,4 @@ function openDetailModal(id) {
 function closeDetailModal() { 
     if(detailModal) detailModal.style.display = 'none'; 
 }
+
