@@ -19,7 +19,6 @@ const tumIller = ["Adana", "Adıyaman", "Afyonkarahisar", "Ağrı", "Amasya", "A
 tumIller.forEach(il => { if(!turkiyeData[il]) turkiyeData[il] = ["Merkez", "Diğer İlçeler"]; });
 
 document.addEventListener('DOMContentLoaded', () => {
-    // İlleri Yükle
     const ilanIl = document.getElementById('ilanIl');
     if(ilanIl) {
         tumIller.sort().forEach(il => {
@@ -27,30 +26,25 @@ document.addEventListener('DOMContentLoaded', () => {
             opt.value = il; opt.textContent = il;
             ilanIl.appendChild(opt);
         });
-        // Sayfa yüklendiğinde Onaya Gönder butonunu güvenle dinlemeye al
-document.addEventListener('DOMContentLoaded', () => {
+    }
+
     const submitBtn = document.getElementById('submitListingBtn');
     if (submitBtn) {
         submitBtn.addEventListener('click', (e) => {
-            e.preventDefault(); // Sayfanın sıfırlanmasını/yenilenmesini engeller
+            e.preventDefault();
             submitListing();
         });
     }
-});
-    }
 
-    // Giriş Yapan Kullanıcının Adını Panele Yazdır
     const savedUser = JSON.parse(localStorage.getItem('emlak360_user'));
     const userDisplay = document.getElementById('panelUserDisplay');
     if(savedUser && userDisplay) {
         userDisplay.innerText = `${savedUser.name} (${savedUser.role === 'kurumsal' ? 'Kurumsal Acente' : 'Bireysel'})`;
     }
     
-    // Varsayılan Kategoriyi Ayarla
     updateDynamicFields();
 });
 
-// İlçeleri Getir
 function loadDistricts() {
     const ilanIl = document.getElementById('ilanIl');
     const ilanIlce = document.getElementById('ilanIlce');
@@ -68,17 +62,16 @@ function loadDistricts() {
     }
 }
 
-// Fotoğraf Yükleme ve Önizleme Algoritması (Base64)
 function previewImages() {
     const fileInput = document.getElementById('imageUpload');
     const previewContainer = document.getElementById('imagePreviewContainer');
+    if(!fileInput || !previewContainer) return;
     
     Array.from(fileInput.files).forEach(file => {
         const reader = new FileReader();
         reader.onload = (e) => {
-            uploadedImagesBase64.push(e.target.result); // Veritabanı için kaydet
+            uploadedImagesBase64.push(e.target.result);
             
-            // Ekranda göster
             const imgWrapper = document.createElement('div');
             imgWrapper.style.position = 'relative';
             
@@ -97,7 +90,6 @@ function previewImages() {
     });
 }
 
-// Sihirbaz İleri / Geri Adımları
 function nextStep(stepNumber) {
     document.querySelectorAll('.wizard-step-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
@@ -111,14 +103,12 @@ function nextStep(stepNumber) {
 
 function prevStep(stepNumber) { nextStep(stepNumber); }
 
-// Satılık / Kiralık Seçimi
 function setTransactionType(type) {
     currentTransactionType = type;
     document.querySelectorAll('.trans-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById(`btn-${type}`).classList.add('active');
 }
 
-// Arsa vs Konut Dinamik Form Alanı Kontrolü
 function updateDynamicFields() {
     const kategori = document.getElementById('ilanKategori').value;
     const binaFields = document.getElementById('binaFields');
@@ -135,19 +125,15 @@ function updateDynamicFields() {
     }
 }
 
-/// PROFESYONEL İLAN KAYIT (DTO) ALGORİTMASI
 function submitListing() {
-    console.log("Onaya Gönder butonuna tıklandı!"); // Konsoldan kontrol için
-
     const kategoriElement = document.getElementById('ilanKategori');
     const baslikElement = document.getElementById('ilanBaslik');
     const fiyatElement = document.getElementById('ilanFiyat');
     const ilElement = document.getElementById('ilanIl');
     const ilceElement = document.getElementById('ilanIlce');
 
-    // Elementlerin sayfada var olup olmadığını ve değerlerini kontrol edelim
     if (!kategoriElement || !baslikElement || !fiyatElement || !ilElement || !ilceElement) {
-        alert("Hata: Form üzerindeki bazı temel alanlar (Kategori, Başlık, Fiyat, İl, İlçe) HTML'de bulunamadı!");
+        alert("Hata: Form üzerindeki temel alanlar eksik!");
         return;
     }
 
@@ -167,12 +153,25 @@ function submitListing() {
     const savedUser = JSON.parse(localStorage.getItem('emlak360_user'));
     const sellerName = savedUser ? `${savedUser.name} (${savedUser.role === 'kurumsal' ? 'Kurumsal Acente' : 'Bireysel'})` : "Emlak360 Yetkili Üye";
 
-    // Eğer kullanıcı fotoğraf yüklemediyse varsayılan bir emlak görseli atıyoruz
-    const finalImages = (typeof uploadedImagesBase64 !== 'undefined' && uploadedImagesBase64.length > 0) 
-        ? uploadedImagesBase64 
+    let finalImages = (typeof uploadedImagesBase64 !== 'undefined' && uploadedImagesBase64.length > 0) 
+        ? [...uploadedImagesBase64] 
         : ["https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800"];
 
-    // İlan DTO Objesi
+    // Panoramik ve 360° Görsel Kontrolleri
+    const panoInput = document.getElementById('panoramicUpload');
+    const tour360Input = document.getElementById('tour360Upload');
+
+    let panoramicImg = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800";
+    let tour360Img = "https://pannellum.org/images/alma.jpg";
+
+    if(panoInput && panoInput.files[0]) {
+        // Geçici URL veya base64 simülasyonu
+        panoramicImg = URL.createObjectURL(panoInput.files[0]);
+    }
+    if(tour360Input && tour360Input.files[0]) {
+        tour360Img = URL.createObjectURL(tour360Input.files[0]);
+    }
+
     const yeniIlanDTO = {
         id: Math.floor(100000 + Math.random() * 900000), 
         type: `${currentTransactionType}-${kategori}`,
@@ -186,7 +185,9 @@ function submitListing() {
         seller: sellerName,
         status: "Bekliyor",
         premium: false,
-        images: finalImages 
+        images: finalImages,
+        panoramicImage: panoramicImg,
+        tour360Image: tour360Img
     };
 
     if(isArsa) {
@@ -209,11 +210,10 @@ function submitListing() {
         yeniIlanDTO.furnished = document.getElementById('ilanEsyali')?.value || "Hayır";
     }
 
-    // LocalStorage üzerinden Admin Onay Kuyruğuna Ekle
     let bekleyenIlanlar = JSON.parse(localStorage.getItem('adminPendingListings')) || [];
     bekleyenIlanlar.push(yeniIlanDTO);
     localStorage.setItem('adminPendingListings', JSON.stringify(bekleyenIlanlar));
 
-    alert("İlanınız başarıyla oluşturuldu ve sistem admin onayına iletildi! Yönlendiriliyorsunuz...");
+    alert("İlanınız başarıyla oluşturuldu ve sistem admin onayına iletildi!");
     window.location.href = "../index.html"; 
 }
