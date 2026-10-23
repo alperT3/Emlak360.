@@ -34,6 +34,7 @@
                     <div class="step" id="step-3-indicator" onclick="nextStep(3)" style="cursor: pointer; transition: 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">3. Fotoğraf & Onay</div>
                 </div>
 
+                <!-- ADIM 1 -->
                 <div class="wizard-step-content active" id="step-1">
                     <h3>Adım Adım Kategori Seç</h3>
                     <div class="transaction-types">
@@ -68,6 +69,7 @@
                     </div>
                 </div>
 
+                <!-- ADIM 2 -->
                 <div class="wizard-step-content" id="step-2">
                     <h3>İlan Detayları</h3>
                     
@@ -78,7 +80,6 @@
                    <div class="form-row">
                         <div class="form-group">
                             <label>İl *</label>
-                            <!-- onchange ile il değiştiğinde ilçeleri getireceğiz -->
                             <select id="ilanIl" onchange="loadDistricts()">
                                 <option value="">İl Seçin</option>
                             </select>
@@ -134,23 +135,42 @@
                     </div>
                 </div>
 
+                <!-- ADIM 3 (Görsel ve 360 Tur Yükleme Alanı Güncellendi) -->
                 <div class="wizard-step-content" id="step-3">
-                    <h3>Fotoğraf ve Onay</h3>
-                    <div class="upload-area">
-                        <p style="font-size: 20px; font-weight: bold; margin-bottom: 10px; color: #2f3640;">Fotoğrafları Ekleyin</p>
-                        <p style="color: #7f8fa6; font-size: 14px; margin-bottom: 20px;">(İlk seçtiğiniz fotoğraf ana vitrin görseli olacaktır.)</p>
-                        <input type="file" id="imageUpload" multiple accept="image/*" onchange="previewImages()" style="background: #f1f2f6; border: none; color: #2f3640; padding: 15px; width: 100%; border-radius: 10px; cursor: pointer;">
+                    <h3>Fotoğraf ve Sanal Tur Yönetimi</h3>
+                    
+                    <div class="upload-area" style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
                         
-                        <!-- Yüklenen resimlerin anında görüleceği kutu -->
-                        <div id="imagePreviewContainer" style="display: flex; gap: 10px; margin-top: 15px; overflow-x: auto;"></div>
+                        <!-- 1. Standart Fotoğraflar -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-size: 16px; font-weight: bold; margin-bottom: 8px; display: block; color: #ff4757;">1. Standart Oda / Vitrin Fotoğrafları (Çoklu Seçilebilir)</label>
+                            <p style="color: #7f8fa6; font-size: 13px; margin-bottom: 10px;">(İlk seçtiğiniz fotoğraf ana vitrin görseli olacaktır.)</p>
+                            <input type="file" id="imageUpload" multiple accept="image/*" onchange="previewImages()" style="background: #f1f2f6; border: none; color: #2f3640; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer;">
+                            <div id="imagePreviewContainer" style="display: flex; gap: 10px; margin-top: 15px; overflow-x: auto;"></div>
+                        </div>
+
+                        <!-- 2. Panoramik Geniş Açı Görsel -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-size: 15px; font-weight: bold; margin-bottom: 8px; display: block; color: #ffa502;">2. Panoramik (Geniş Açı) Görsel (İsteğe Bağlı)</label>
+                            <input type="file" id="panoramicUpload" accept="image/*" style="background: #f1f2f6; border: none; color: #2f3640; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer;">
+                        </div>
+
+                        <!-- 3. 360° Küresel Tur Görseli -->
+                        <div>
+                            <label style="font-size: 15px; font-weight: bold; margin-bottom: 8px; display: block; color: #2ed573;">3. 360° Tam Küre Görsel (Equirectangular) - Sanal Tur İçin</label>
+                            <input type="file" id="tour360Upload" accept="image/*" style="background: #f1f2f6; border: none; color: #2f3640; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer;">
+                        </div>
+
                     </div>
                     
                     <div style="margin-top: 30px; display: flex; justify-content: space-between;">
                         <button type="button" class="btn-prev" onclick="prevStep(2)">⬅ Geri</button>
-                        <!-- ID eklendi ve onclick yerine güvenli dinleyiciye bırakıldı -->
-                       <button type="button" id="submitListingBtn" class="btn-submit" onclick="submitListing()" style="background: #ff4757; color: white; padding: 12px 25px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">🚀 Onaya Gönder</button>
+                        <button type="button" id="submitListingBtn" class="btn-submit" onclick="submitListing()" style="background: #ff4757; color: white; padding: 12px 25px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">🚀 Onaya Gönder</button>
                     </div>
                 </div>
+
+            </div>
+        </main>
     </div>
 
     <script src="../js/seller.js"></script>
